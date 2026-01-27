@@ -109,8 +109,8 @@ export default function Register() {
               <div className="space-y-2">
                 <Label htmlFor="phonenumber">Phone Number</Label>
                 <Input
-                  id="phonenumber"
-                  name="phonenumber"
+                  id="phoneNumber"
+                  name="phoneNumber"
                   type="tel"
                   placeholder="99999999999"
                   value={formData.phoneNumber}
