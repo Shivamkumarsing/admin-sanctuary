@@ -1,32 +1,72 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Building2, Eye, EyeOff } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Building2, Loader2 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { registerUser, resetAuthState } from "@/store/slices/authSlice";
+import { toast } from "@/hooks/use-toast";
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    fullName: "",
+    userName: "",
     email: "",
-    password: "",
-    confirmPassword: "",
+    role: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { isLoading, error, isSuccess } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "Registration Successful",
+        description: "Your account has been created successfully!",
+      });
+      navigate("/dashboard");
+    }
+  }, [isSuccess, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Registration Failed",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetAuthState());
+    };
+  }, [dispatch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleRoleChange = (value: string) => {
+    setFormData({ ...formData, role: value });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Navigate to dashboard after registration
-    navigate("/dashboard");
+    
+    if (!formData.userName || !formData.email || !formData.role) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    dispatch(registerUser(formData));
   };
 
   return (
@@ -51,15 +91,16 @@ export default function Register() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="userName">User Name</Label>
                 <Input
-                  id="fullName"
-                  name="fullName"
+                  id="userName"
+                  name="userName"
                   type="text"
-                  placeholder="John Doe"
-                  value={formData.fullName}
+                  placeholder="johndoe"
+                  value={formData.userName}
                   onChange={handleChange}
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -73,70 +114,36 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  disabled={isLoading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                <Label htmlFor="role">Role</Label>
+                <Select 
+                  value={formData.role} 
+                  onValueChange={handleRoleChange}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-2">
-                <Checkbox 
-                  id="terms" 
-                  checked={acceptTerms}
-                  onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="terms" className="text-sm font-normal cursor-pointer leading-relaxed">
-                  I agree to the{" "}
-                  <Link to="/terms" className="text-accent hover:underline">Terms of Service</Link>
-                  {" "}and{" "}
-                  <Link to="/privacy" className="text-accent hover:underline">Privacy Policy</Link>
-                </Label>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={!acceptTerms}>
-                Create account
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create account"
+                )}
               </Button>
             </form>
 
