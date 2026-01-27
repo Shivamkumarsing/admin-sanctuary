@@ -25,8 +25,8 @@ export default function Register() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just navigate to login
-    navigate("/login");
+    // Navigate to dashboard after registration
+    navigate("/dashboard");
   };
 
   return (
