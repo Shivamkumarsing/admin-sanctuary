@@ -13,9 +13,11 @@ import { toast } from "@/hooks/use-toast";
 export default function Register() {
   const [formData, setFormData] = useState({
     userName: "",
+    phoneNumber: "",
     email: "",
     role: "",
   });
+  
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { isLoading, error, isSuccess } = useAppSelector((state) => state.auth);
@@ -57,7 +59,7 @@ export default function Register() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.userName || !formData.email || !formData.role) {
+    if (!formData.userName || !formData.email || !formData.role || !formData.phoneNumber) {
       toast({
         title: "Validation Error",
         description: "Please fill in all fields",
@@ -98,6 +100,20 @@ export default function Register() {
                   type="text"
                   placeholder="johndoe"
                   value={formData.userName}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phonenumber">Phone Number</Label>
+                <Input
+                  id="phonenumber"
+                  name="phonenumber"
+                  type="tel"
+                  placeholder="99999999999"
+                  value={formData.phoneNumber}
                   onChange={handleChange}
                   required
                   disabled={isLoading}

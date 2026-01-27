@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/Screenshot_2026-01-27_204458-removebg-preview.png"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -50,9 +51,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg gradient-accent flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-accent-foreground" />
-          </div>
+          <img
+            src={logo}
+            alt="Logo"
+            className="w-16 h-16 object-contain"
+          />
+
           {!collapsed && (
             <span className="font-semibold text-sidebar-accent-foreground text-lg">
               AdminHub

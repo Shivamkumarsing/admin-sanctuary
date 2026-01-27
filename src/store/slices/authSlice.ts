@@ -5,6 +5,7 @@ interface RegisterPayload {
   userName: string;
   email: string;
   role: string;
+  phoneNumber: string;
 }
 
 interface AuthState {
@@ -12,6 +13,8 @@ interface AuthState {
     userName: string;
     email: string;
     role: string;
+    phoneNumber: string;
+
   };
   isLoading: boolean;
   error: string | null;
@@ -29,7 +32,7 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData: RegisterPayload, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/api/register', userData);
+      const response = await axiosInstance.post('/api/Account/registration', userData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

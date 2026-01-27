@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Building2, Eye, EyeOff } from "lucide-react";
+import logo from "@/assets/Screenshot_2026-01-27_204458-removebg-preview.png"
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -25,9 +26,12 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-            <Building2 className="w-7 h-7 text-primary-foreground" />
-          </div>
+          <div className="w-12 h-12 rounded-x flex items-center justify-center">
+          <img
+            src={logo}
+            alt="Logo"
+            className="w-16 h-16 object-contain"
+          />          </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">SocietyAdmin</h1>
             <p className="text-xs text-muted-foreground">Super Admin Panel</p>
