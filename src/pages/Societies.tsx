@@ -23,6 +23,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { AddSocietyModal } from "@/components/societies/AddSocietyModal";
 
 const societies = [
   { id: 1, name: "Greenview Apartments", city: "Mumbai", users: 124, plan: "Premium", status: "active", admin: "Rajesh Kumar", phone: "+91 98765 43210", createdAt: "2024-01-15" },
@@ -43,6 +44,7 @@ const statusStyles = {
 
 export default function Societies() {
   const [selectedSociety, setSelectedSociety] = useState<typeof societies[0] | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   return (
     <AdminLayout>
@@ -54,7 +56,7 @@ export default function Societies() {
             Manage all onboarded societies and their subscriptions
           </p>
         </div>
-        <Button className="gradient-accent text-accent-foreground">
+        <Button className="gradient-accent text-accent-foreground" onClick={() => setIsAddModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Add Society
         </Button>
@@ -233,6 +235,9 @@ export default function Societies() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Add Society Modal */}
+      <AddSocietyModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} />
     </AdminLayout>
   );
 }
