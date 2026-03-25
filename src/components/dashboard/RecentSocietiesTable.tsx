@@ -6,14 +6,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAppSelector } from "@/store/hooks";
 
-const societies = [
-  { id: 1, name: "Greenview Apartments", city: "Mumbai", users: 124, plan: "Premium", status: "active" },
-  { id: 2, name: "Sunrise Tower", city: "Delhi", users: 89, plan: "Basic", status: "active" },
-  { id: 3, name: "Palm Gardens", city: "Bangalore", users: 156, plan: "Enterprise", status: "pending" },
-  { id: 4, name: "Ocean View Society", city: "Chennai", users: 67, plan: "Premium", status: "active" },
-  { id: 5, name: "Mountain Heights", city: "Pune", users: 45, plan: "Basic", status: "suspended" },
-];
+
 
 const statusStyles = {
   active: "status-active",
@@ -22,6 +17,11 @@ const statusStyles = {
 };
 
 export function RecentSocietiesTable() {
+   const { recentSocieties, isLoading, error } :any= useAppSelector(
+      (state) => state.dashboard,
+    );
+    console.log("Recent Societies from Redux:", recentSocieties);
+  const societies:any = recentSocieties?.societies || [];
   return (
     <div className="table-container animate-fade-in">
       <div className="p-6 border-b border-border">
@@ -53,7 +53,7 @@ export function RecentSocietiesTable() {
             </tr>
           </thead>
           <tbody>
-            {societies.map((society) => (
+            {societies?.map((society:any) => (
               <tr key={society.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">

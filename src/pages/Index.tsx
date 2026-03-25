@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
-import { fetchDashboardStats } from "@/store/slices/dashboardSlice";
+import { fetchDashboardStats, fetchRecentSocieties, fetchRecentTickets, fetchRevenueGrowth, fetchSubscriptionStatus } from "@/store/slices/dashboardSlice";
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -32,9 +32,13 @@ const Index = () => {
   );
 
 
-  useEffect(() => {
-    dispatch(fetchDashboardStats());
-  }, [dispatch]);
+useEffect(() => {
+  dispatch(fetchDashboardStats());
+  dispatch(fetchRevenueGrowth());
+  dispatch(fetchSubscriptionStatus());
+  dispatch(fetchRecentSocieties());
+  dispatch(fetchRecentTickets());
+}, [dispatch]);
   return (
     <AdminLayout>
       {/* Page Header */}
