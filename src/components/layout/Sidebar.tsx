@@ -14,11 +14,11 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/Screenshot_2026-01-27_204458-removebg-preview.png"
-
+import { useNavigate } from "react-router-dom";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Building2, label: "Societies", path: "/societies" },
@@ -31,6 +31,7 @@ const navItems = [
   { icon: Shield, label: "Roles", path: "/roles" },
   { icon: FileText, label: "Audit Logs", path: "/audit-logs" },
   { icon: Settings, label: "Settings", path: "/settings" },
+  
 ];
 
 interface SidebarProps {
@@ -40,7 +41,18 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation();
+const navigate = useNavigate();
 
+const handleLogout = () => {
+  // ⭐ Clear storage
+  localStorage.clear();
+
+  // If you use sessionStorage also:
+  sessionStorage.clear();
+
+  // ⭐ Redirect to login
+  navigate("/login", { replace: true });
+};
   return (
     <aside
       className={cn(
@@ -108,6 +120,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               </p>
               <p className="text-xs text-sidebar-muted truncate">admin@company.com</p>
             </div>
+            {/* <button
+    onClick={handleLogout}
+    className={cn(
+      "w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm",
+      "text-red-500 hover:bg-red-500/10 transition-colors"
+    )}
+  >
+    <span>🚪</span>
+    {!collapsed && <span>Logout</span>}
+  </button> */}
           </div>
         )}
         {collapsed && (

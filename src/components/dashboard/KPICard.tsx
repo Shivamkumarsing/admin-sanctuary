@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface KPICardProps {
   title: string;
-  value: string;
+  value: string|number;
   change: number;
   icon: LucideIcon;
   iconColor?: string;
