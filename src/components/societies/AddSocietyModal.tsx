@@ -26,12 +26,13 @@ interface AddSocietyModalProps {
 
 export function AddSocietyModal({ open, onOpenChange }: AddSocietyModalProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    city: "",
-    admin: "",
-    phone: "",
-    plan: "",
-  });
+  name: "",
+  city: "",
+  adminName: "",
+  phone: "",
+  email: "",
+  planId: "",
+});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,41 +44,73 @@ export function AddSocietyModal({ open, onOpenChange }: AddSocietyModalProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.city || !formData.admin || !formData.phone || !formData.plan) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    setIsLoading(true);
-    
-    try {
-      // TODO: Replace with actual API call using Redux
-      // await dispatch(addSociety(formData));
-      
-      toast({
-        title: "Success",
-        description: "Society added successfully",
-      });
-      
-      setFormData({ name: "", city: "", admin: "", phone: "", plan: "" });
-      onOpenChange(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add society",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { name, city, adminName, phone, email, planId } = formData;
+
+  if (!name || !city || !adminName || !phone || !email || !planId) {
+    toast({
+      title: "Validation Error",
+      description: "Please fill in all fields",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const token = localStorage.getItem("accessToken");
+
+    const response = await fetch(
+      "http://localhost:3002/dashboard/add-societies",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name,
+          city,
+          adminName,
+          phone,
+          email,
+          planId: Number(planId),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message);
+
+    toast({
+      title: "Success",
+      description: "Society added successfully",
+    });
+
+    setFormData({
+      name: "",
+      city: "",
+      adminName: "",
+      phone: "",
+      email: "",
+      planId: "",
+    });
+
+    onOpenChange(false);
+  } catch (error: any) {
+    toast({
+      title: "Error",
+      description: error.message || "Failed to add society",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -127,9 +160,9 @@ export function AddSocietyModal({ open, onOpenChange }: AddSocietyModalProps) {
               <Label htmlFor="admin">Admin Name</Label>
               <Input
                 id="admin"
-                name="admin"
+                name="adminName"
                 placeholder="Enter admin name"
-                value={formData.admin}
+                value={formData.adminName}
                 onChange={handleInputChange}
               />
             </div>
@@ -145,20 +178,31 @@ export function AddSocietyModal({ open, onOpenChange }: AddSocietyModalProps) {
                 onChange={handleInputChange}
               />
             </div>
+            <div className="space-y-2">
+  <Label htmlFor="email">Admin Email</Label>
+  <Input
+    id="email"
+    name="email"
+    type="email"
+    placeholder="admin@email.com"
+    value={formData.email}
+    onChange={handleInputChange}
+  />
+</div>
             
             <div className="space-y-2">
-              <Label htmlFor="plan">Plan</Label>
+              <Label htmlFor="planId">Plan</Label>
               <Select
-                value={formData.plan}
-                onValueChange={(value) => handleSelectChange("plan", value)}
+                value={formData.planId}
+                onValueChange={(value) => handleSelectChange("planId", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select plan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Basic">Basic</SelectItem>
-                  <SelectItem value="Premium">Premium</SelectItem>
-                  <SelectItem value="Enterprise">Enterprise</SelectItem>
+                  <SelectItem value="1">Basic</SelectItem>
+                  <SelectItem value="2">Premium</SelectItem>
+                  <SelectItem value="3">Enterprise</SelectItem>
                 </SelectContent>
               </Select>
             </div>

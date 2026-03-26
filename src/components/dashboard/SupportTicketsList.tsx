@@ -2,8 +2,6 @@ import { MessageSquare, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 
-
-
 const priorityStyles = {
   high: "bg-destructive/10 text-destructive",
   medium: "bg-warning/10 text-warning",

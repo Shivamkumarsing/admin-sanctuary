@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Building2, Search, MoreHorizontal, Filter, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,17 +24,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { AddSocietyModal } from "@/components/societies/AddSocietyModal";
+import { fetchRecentSocieties } from "@/store/slices/dashboardSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
-const societies = [
-  { id: 1, name: "Greenview Apartments", city: "Mumbai", users: 124, plan: "Premium", status: "active", admin: "Rajesh Kumar", phone: "+91 98765 43210", createdAt: "2024-01-15" },
-  { id: 2, name: "Sunrise Tower", city: "Delhi", users: 89, plan: "Basic", status: "active", admin: "Priya Sharma", phone: "+91 98765 43211", createdAt: "2024-02-20" },
-  { id: 3, name: "Palm Gardens", city: "Bangalore", users: 156, plan: "Enterprise", status: "pending", admin: "Arun Patel", phone: "+91 98765 43212", createdAt: "2024-03-10" },
-  { id: 4, name: "Ocean View Society", city: "Chennai", users: 67, plan: "Premium", status: "active", admin: "Lakshmi Iyer", phone: "+91 98765 43213", createdAt: "2024-03-25" },
-  { id: 5, name: "Mountain Heights", city: "Pune", users: 45, plan: "Basic", status: "suspended", admin: "Vikram Singh", phone: "+91 98765 43214", createdAt: "2024-04-01" },
-  { id: 6, name: "City Center Plaza", city: "Hyderabad", users: 210, plan: "Enterprise", status: "active", admin: "Meena Reddy", phone: "+91 98765 43215", createdAt: "2024-04-15" },
-  { id: 7, name: "Lakeside Villas", city: "Kolkata", users: 78, plan: "Premium", status: "active", admin: "Amit Das", phone: "+91 98765 43216", createdAt: "2024-05-01" },
-  { id: 8, name: "Green Valley Homes", city: "Jaipur", users: 92, plan: "Basic", status: "pending", admin: "Sanjay Gupta", phone: "+91 98765 43217", createdAt: "2024-05-20" },
-];
+
 
 const statusStyles = {
   active: "status-active",
@@ -45,6 +38,18 @@ const statusStyles = {
 export default function Societies() {
   const [selectedSociety, setSelectedSociety] = useState<typeof societies[0] | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const dispatch = useAppDispatch();
+
+    const { recentSocieties, isLoading, error } :any= useAppSelector(
+          (state) => state.dashboard,
+        );
+        console.log("Recent Societies from Redux:", recentSocieties);
+      const societies:any = recentSocieties?.societies || [];
+  
+  useEffect(() => {
+    dispatch(fetchRecentSocieties());
+  
+  }, [dispatch]);
 
   return (
     <AdminLayout>
@@ -56,7 +61,8 @@ export default function Societies() {
             Manage all onboarded societies and their subscriptions
           </p>
         </div>
-        <Button className="gradient-accent text-accent-foreground" onClick={() => setIsAddModalOpen(true)}>
+        <Button className="gradient-accent text-accent-foreground" 
+        onClick={() => setIsAddModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Add Society
         </Button>
