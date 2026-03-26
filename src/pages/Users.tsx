@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Search, MoreHorizontal, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,15 +26,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUsersList } from "@/store/slices/userSlice";
 
-const users = [
-  { id: 1, name: "Rajesh Kumar", email: "rajesh@greenview.com", role: "Society Admin", society: "Greenview Apartments", status: "active", avatar: "" },
-  { id: 2, name: "Priya Sharma", email: "priya@sunrise.com", role: "Society Admin", society: "Sunrise Tower", status: "active", avatar: "" },
-  { id: 3, name: "Admin Support", email: "support@adminhub.com", role: "Support Agent", society: "Platform", status: "active", avatar: "" },
-  { id: 4, name: "Super Admin", email: "admin@adminhub.com", role: "Super Admin", society: "Platform", status: "active", avatar: "" },
-  { id: 5, name: "Arun Patel", email: "arun@palmgardens.com", role: "Society Admin", society: "Palm Gardens", status: "pending", avatar: "" },
-  { id: 6, name: "Lakshmi Iyer", email: "lakshmi@oceanview.com", role: "Society Admin", society: "Ocean View Society", status: "active", avatar: "" },
-];
+
 
 const roleStyles = {
   "Super Admin": "bg-chart-2/10 text-chart-2",
@@ -50,7 +45,22 @@ const statusStyles = {
 
 export default function UsersPage() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+    const dispatch = useAppDispatch();
 
+   const { users: usersList, isLoading, error } =
+  useAppSelector((state) => state.usersSlice);
+      
+  
+  useEffect(() => {
+     dispatch(fetchUsersList());
+   }, [dispatch]);
+
+   const getInitials = (name: string = "") =>
+  name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
   return (
     <AdminLayout>
       {/* Page Header */}
@@ -124,49 +134,101 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={user.avatar} />
-                        <AvatarFallback className="bg-secondary text-muted-foreground">
-                          {user.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-foreground">{user.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">{user.email}</td>
-                  <td className="py-4 px-6">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${roleStyles[user.role as keyof typeof roleStyles]}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">{user.society}</td>
-                  <td className="py-4 px-6">
-                    <span className={statusStyles[user.status as keyof typeof statusStyles]}>
-                      {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Edit User</DropdownMenuItem>
-                        <DropdownMenuItem>Reset Password</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Deactivate</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {isLoading && (
+    <tr>
+      <td colSpan={6} className="text-center py-6">
+        Loading users...
+      </td>
+    </tr>
+  )}
+
+  {error && (
+    <tr>
+      <td colSpan={6} className="text-center text-red-500 py-6">
+        {error}
+      </td>
+    </tr>
+  )}
+
+  {usersList?.map((user: any) => (
+    <tr
+      key={user.id}
+      className="border-b border-border hover:bg-secondary/30"
+    >
+      {/* USER */}
+     <td className="py-4 px-6">
+  <div className="flex items-center gap-3">
+
+    <Avatar className="w-10 h-10">
+      {/* If you later get profile image URL */}
+      <AvatarImage src={user.avatar || ""} />
+
+      <AvatarFallback>
+        {getInitials(user.user)}
+      </AvatarFallback>
+    </Avatar>
+
+    <span className="font-medium">
+      {user.user}
+    </span>
+
+  </div>
+</td>
+
+      {/* EMAIL */}
+      <td className="py-4 px-6 text-muted-foreground">
+        {user.email}
+      </td>
+
+      {/* ROLE */}
+      <td className="py-4 px-6">
+        <span className="px-2 py-1 rounded-full text-xs bg-accent/10 text-accent">
+          {user.role}
+        </span>
+      </td>
+
+      {/* SOCIETY */}
+      <td className="py-4 px-6 text-muted-foreground">
+        {user.society || "—-"}
+      </td>
+
+      {/* STATUS */}
+      <td className="py-4 px-6">
+        <span
+          className={
+            statusStyles[
+              user.status as keyof typeof statusStyles
+            ]
+          }
+        >
+          {user.status}
+        </span>
+      </td>
+
+      {/* ACTION */}
+      <td className="py-4 px-6 text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>View Profile</DropdownMenuItem>
+            <DropdownMenuItem>Edit User</DropdownMenuItem>
+            <DropdownMenuItem>
+              Reset Password
+            </DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">
+              Deactivate
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
       </div>
