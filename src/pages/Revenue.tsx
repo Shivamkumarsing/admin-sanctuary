@@ -1,5 +1,11 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { Calendar, Download, DollarSign, TrendingUp, Package } from "lucide-react";
+import {
+  Calendar,
+  Download,
+  DollarSign,
+  TrendingUp,
+  Package,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -8,7 +14,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  fetchInvoices,
+  fetchRevenueByPlan,
+  fetchRevenueStats,
+  fetchRevenueTrend,
+} from "@/store/slices/revenue.slice";
 
 const revenueData = [
   { month: "Jan", revenue: 45000 },
@@ -32,11 +60,41 @@ const planRevenueData = [
 ];
 
 const invoices = [
-  { id: "INV-001", society: "Greenview Apartments", amount: "$299", date: "2024-05-01", status: "paid" },
-  { id: "INV-002", society: "Sunrise Tower", amount: "$99", date: "2024-05-01", status: "paid" },
-  { id: "INV-003", society: "Palm Gardens", amount: "$599", date: "2024-05-01", status: "pending" },
-  { id: "INV-004", society: "Ocean View Society", amount: "$299", date: "2024-05-01", status: "paid" },
-  { id: "INV-005", society: "City Center Plaza", amount: "$599", date: "2024-05-01", status: "paid" },
+  {
+    id: "INV-001",
+    society: "Greenview Apartments",
+    amount: "$299",
+    date: "2024-05-01",
+    status: "paid",
+  },
+  {
+    id: "INV-002",
+    society: "Sunrise Tower",
+    amount: "$99",
+    date: "2024-05-01",
+    status: "paid",
+  },
+  {
+    id: "INV-003",
+    society: "Palm Gardens",
+    amount: "$599",
+    date: "2024-05-01",
+    status: "pending",
+  },
+  {
+    id: "INV-004",
+    society: "Ocean View Society",
+    amount: "$299",
+    date: "2024-05-01",
+    status: "paid",
+  },
+  {
+    id: "INV-005",
+    society: "City Center Plaza",
+    amount: "$599",
+    date: "2024-05-01",
+    status: "paid",
+  },
 ];
 
 const statusStyles = {
@@ -46,6 +104,17 @@ const statusStyles = {
 };
 
 export default function Revenue() {
+  const dispatch = useAppDispatch();
+
+  const { stats } = useAppSelector((state) => state.revenueSlice);
+  console.log("Revenue Stats:::::::::", stats);
+
+  useEffect(() => {
+    dispatch(fetchRevenueStats());
+    dispatch(fetchRevenueTrend());
+    dispatch(fetchRevenueByPlan());
+    dispatch(fetchInvoices({ page: 1, limit: 10 }));
+  }, [dispatch]);
   return (
     <AdminLayout>
       {/* Page Header */}
@@ -80,13 +149,17 @@ export default function Revenue() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="kpi-card">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">Total Revenue</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              Total Revenue
+            </span>
             <div className="p-2 rounded-lg bg-accent/10 text-accent">
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-bold text-foreground">$837,000</span>
+            <span className="text-3xl font-bold text-foreground">
+              ₹{stats?.total_revenue?.toLocaleString()}
+            </span>
           </div>
           <p className="text-sm text-success flex items-center gap-1">
             <TrendingUp className="w-4 h-4" /> +18.2% from last year
@@ -95,45 +168,77 @@ export default function Revenue() {
 
         <div className="kpi-card">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">MRR</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              MRR
+            </span>
             <div className="p-2 rounded-lg bg-success/10 text-success">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-bold text-foreground">$95,400</span>
+            <span className="text-3xl font-bold text-foreground">
+              ₹{stats?.monthly_recurring_revenue?.toLocaleString()}
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">Monthly recurring revenue</p>
+          <p className="text-sm text-muted-foreground">
+            Monthly recurring revenue
+          </p>
         </div>
 
         <div className="kpi-card">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">Avg Revenue/Society</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              Avg Revenue/Society
+            </span>
             <div className="p-2 rounded-lg bg-chart-2/10 text-chart-2">
               <Package className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-bold text-foreground">$612</span>
+            <span className="text-3xl font-bold text-foreground">
+              ₹{stats?.per_active_subscription?.toLocaleString()}
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">Per active subscription</p>
+          <p className="text-sm text-muted-foreground">
+            Per active subscription
+          </p>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2 admin-card p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-6">Revenue Trend</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-6">
+            Revenue Trend
+          </h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenueData}>
                 <defs>
-                  <linearGradient id="revenueGradient2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(173, 80%, 40%)" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="hsl(173, 80%, 40%)" stopOpacity={0} />
+                  <linearGradient
+                    id="revenueGradient2"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor="hsl(173, 80%, 40%)"
+                      stopOpacity={0.3}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor="hsl(173, 80%, 40%)"
+                      stopOpacity={0}
+                    />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" vertical={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(214, 32%, 91%)"
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="month"
                   axisLine={false}
@@ -152,7 +257,10 @@ export default function Revenue() {
                     border: "1px solid hsl(214, 32%, 91%)",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+                  formatter={(value: number) => [
+                    `$${value.toLocaleString()}`,
+                    "Revenue",
+                  ]}
                 />
                 <Area
                   type="monotone"
@@ -167,7 +275,9 @@ export default function Revenue() {
         </div>
 
         <div className="admin-card p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-6">Revenue by Plan</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-6">
+            Revenue by Plan
+          </h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -185,7 +295,10 @@ export default function Revenue() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
+                  formatter={(value: number) => [
+                    `$${value.toLocaleString()}`,
+                    "",
+                  ]}
                 />
                 <Legend />
               </PieChart>
@@ -197,7 +310,9 @@ export default function Revenue() {
       {/* Invoice History */}
       <div className="table-container animate-fade-in">
         <div className="p-6 border-b border-border">
-          <h3 className="text-lg font-semibold text-foreground">Invoice History</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            Invoice History
+          </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -225,14 +340,32 @@ export default function Revenue() {
             </thead>
             <tbody>
               {invoices.map((invoice) => (
-                <tr key={invoice.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
-                  <td className="py-4 px-6 font-medium text-foreground">{invoice.id}</td>
-                  <td className="py-4 px-6 text-muted-foreground">{invoice.society}</td>
-                  <td className="py-4 px-6 font-medium text-foreground">{invoice.amount}</td>
-                  <td className="py-4 px-6 text-muted-foreground">{invoice.date}</td>
+                <tr
+                  key={invoice.id}
+                  className="border-b border-border hover:bg-secondary/30 transition-colors"
+                >
+                  <td className="py-4 px-6 font-medium text-foreground">
+                    {invoice.id}
+                  </td>
+                  <td className="py-4 px-6 text-muted-foreground">
+                    {invoice.society}
+                  </td>
+                  <td className="py-4 px-6 font-medium text-foreground">
+                    {invoice.amount}
+                  </td>
+                  <td className="py-4 px-6 text-muted-foreground">
+                    {invoice.date}
+                  </td>
                   <td className="py-4 px-6">
-                    <span className={statusStyles[invoice.status as keyof typeof statusStyles]}>
-                      {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                    <span
+                      className={
+                        statusStyles[
+                          invoice.status as keyof typeof statusStyles
+                        ]
+                      }
+                    >
+                      {invoice.status.charAt(0).toUpperCase() +
+                        invoice.status.slice(1)}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-right">

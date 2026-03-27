@@ -1,5 +1,12 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { CreditCard, Calendar, TrendingUp, AlertTriangle, Search, Download } from "lucide-react";
+import {
+  CreditCard,
+  Calendar,
+  TrendingUp,
+  AlertTriangle,
+  Search,
+  Download,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,15 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useEffect } from "react";
+import {
+  fetchSubscriptionList,
+  fetchSubscriptionStats,
+} from "@/store/slices/subscriptionSlice";
+import { fetchSubscriptionStatus } from "@/store/slices/dashboardSlice";
 
-const subscriptions = [
-  { id: 1, society: "Greenview Apartments", plan: "Premium", startDate: "2024-01-15", expiryDate: "2025-01-15", status: "active", amount: "$299/mo" },
-  { id: 2, society: "Sunrise Tower", plan: "Basic", startDate: "2024-02-20", expiryDate: "2025-02-20", status: "active", amount: "$99/mo" },
-  { id: 3, society: "Palm Gardens", plan: "Enterprise", startDate: "2024-03-10", expiryDate: "2024-06-10", status: "expiring", amount: "$599/mo" },
-  { id: 4, society: "Ocean View Society", plan: "Premium", startDate: "2024-03-25", expiryDate: "2025-03-25", status: "active", amount: "$299/mo" },
-  { id: 5, society: "Mountain Heights", plan: "Basic", startDate: "2023-04-01", expiryDate: "2024-04-01", status: "expired", amount: "$99/mo" },
-  { id: 6, society: "City Center Plaza", plan: "Enterprise", startDate: "2024-04-15", expiryDate: "2025-04-15", status: "active", amount: "$599/mo" },
-];
 
 const statusStyles = {
   active: "status-active",
@@ -26,6 +32,17 @@ const statusStyles = {
 };
 
 export default function Subscriptions() {
+  const dispatch = useAppDispatch();
+
+  const { stats, isLoading, error, list, pagination } = useAppSelector(
+    (state) => state.subscriptionsSlice,
+  );
+
+
+  useEffect(() => {
+    dispatch(fetchSubscriptionStats());
+    dispatch(fetchSubscriptionList({ page: 1, limit: 10 }));
+  }, [dispatch]);
   return (
     <AdminLayout>
       {/* Page Header */}
@@ -46,39 +63,51 @@ export default function Subscriptions() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="kpi-card">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">Active Subscriptions</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              Active Subscriptions
+            </span>
             <div className="p-2 rounded-lg bg-success/10 text-success">
               <CreditCard className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-bold text-foreground">156</span>
+            <span className="text-3xl font-bold text-foreground">
+              {stats?.active_subscriptions || 0}
+            </span>
           </div>
           <p className="text-sm text-muted-foreground">Across all plans</p>
         </div>
 
         <div className="kpi-card">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">Expiring Soon</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              Expiring Soon
+            </span>
             <div className="p-2 rounded-lg bg-warning/10 text-warning">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-bold text-foreground">24</span>
+            <span className="text-3xl font-bold text-foreground">
+              {stats?.expiring_soon || 0}
+            </span>
           </div>
           <p className="text-sm text-muted-foreground">Within 30 days</p>
         </div>
 
         <div className="kpi-card">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">Monthly Revenue</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              Monthly Revenue
+            </span>
             <div className="p-2 rounded-lg bg-accent/10 text-accent">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-bold text-foreground">$95,400</span>
+            <span className="text-3xl font-bold text-foreground">
+              ₹{stats?.monthly_revenue?.toLocaleString() || 0}
+            </span>
           </div>
           <p className="text-sm text-muted-foreground">+12% from last month</p>
         </div>
@@ -144,36 +173,56 @@ export default function Subscriptions() {
               </tr>
             </thead>
             <tbody>
-              {subscriptions.map((sub) => (
-                <tr key={sub.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
+              {list?.map((sub: any) => (
+                <tr
+                  key={sub.id}
+                  className="border-b border-border hover:bg-secondary/30"
+                >
+                  {/* SOCIETY */}
                   <td className="py-4 px-6">
-                    <span className="font-medium text-foreground">{sub.society}</span>
+                    <span className="font-medium">{sub.society}</span>
                   </td>
+
+                  {/* PLAN */}
                   <td className="py-4 px-6">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-foreground">
+                    <span className="px-2.5 py-1 rounded-full text-xs bg-secondary">
                       {sub.plan}
                     </span>
                   </td>
+
+                  {/* START DATE */}
                   <td className="py-4 px-6 text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
-                      {sub.startDate}
+                      {new Date(sub.start_date).toLocaleDateString()}
                     </div>
                   </td>
+
+                  {/* END DATE */}
                   <td className="py-4 px-6 text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
-                      {sub.expiryDate}
+                      {new Date(sub.end_date).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="py-4 px-6">
-                    <span className="font-medium text-foreground">{sub.amount}</span>
+
+                  {/* AMOUNT */}
+                  <td className="py-4 px-6 font-medium">
+                    ₹{Number(sub.amount).toLocaleString()}
                   </td>
+
+                  {/* STATUS */}
                   <td className="py-4 px-6">
-                    <span className={statusStyles[sub.status as keyof typeof statusStyles]}>
+                    <span
+                      className={
+                        statusStyles[sub.status as keyof typeof statusStyles]
+                      }
+                    >
                       {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
                     </span>
                   </td>
+
+                  {/* ACTION */}
                   <td className="py-4 px-6 text-right">
                     <Button variant="ghost" size="sm" className="text-accent">
                       Download
