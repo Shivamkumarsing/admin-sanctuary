@@ -4,6 +4,7 @@ import dashboardReducer from "./slices/dashboardSlice";
 import userReducer from "./slices/userSlice";
 import subscriptionReducer from "./slices/subscriptionSlice";
 import revenueReducer from "./slices/revenue.slice";
+import announcementReducer from "./slices/announcements.slice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -11,6 +12,7 @@ export const store = configureStore({
     usersSlice:userReducer,
     subscriptionsSlice: subscriptionReducer,
     revenueSlice: revenueReducer,
+    announcementsSlice: announcementReducer,
   },
 });
 

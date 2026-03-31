@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/axiosInstance";
 
 
-// ================= TYPES =================
 
 interface RevenueStats {
   per_active_subscription: any;
@@ -44,7 +43,6 @@ interface RevenueState {
 }
 
 
-// ================= INITIAL STATE =================
 
 const initialState: RevenueState = {
   stats: null,
@@ -56,10 +54,6 @@ const initialState: RevenueState = {
   error: null,
 };
 
-
-// =================================================
-// ⭐ API 1 — REVENUE STATS
-// =================================================
 
 export const fetchRevenueStats = createAsyncThunk(
   "revenue/fetchStats",
@@ -77,19 +71,15 @@ export const fetchRevenueStats = createAsyncThunk(
 );
 
 
-// =================================================
-// ⭐ API 2 — REVENUE TREND
-// =================================================
-
 export const fetchRevenueTrend = createAsyncThunk(
   "revenue/fetchTrend",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/revenue/trend");
-      return res.data.data;
+      return res.data;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message ||
+        error.response||
           "Failed to fetch revenue trend"
       );
     }
@@ -97,16 +87,12 @@ export const fetchRevenueTrend = createAsyncThunk(
 );
 
 
-// =================================================
-// ⭐ API 3 — REVENUE BY PLAN
-// =================================================
-
 export const fetchRevenueByPlan = createAsyncThunk(
   "revenue/fetchByPlan",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/revenue/by-plan");
-      return res.data.data;
+      return res.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message ||
@@ -117,10 +103,6 @@ export const fetchRevenueByPlan = createAsyncThunk(
 );
 
 
-// =================================================
-// ⭐ API 4 — INVOICES LIST
-// =================================================
-
 export const fetchInvoices = createAsyncThunk(
   "revenue/fetchInvoices",
   async (params: any = {}, { rejectWithValue }) => {
@@ -129,7 +111,7 @@ export const fetchInvoices = createAsyncThunk(
         "/revenue/invoices",
         { params }
       );
-      return res.data.data;
+      return res.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message ||
@@ -139,11 +121,6 @@ export const fetchInvoices = createAsyncThunk(
   }
 );
 
-
-// =================================================
-// ⭐ SLICE
-// =================================================
-
 const revenueSlice = createSlice({
   name: "revenue",
   initialState,
@@ -152,7 +129,6 @@ const revenueSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      // ===== STATS =====
       .addCase(fetchRevenueStats.pending, (state) => {
         state.isLoading = true;
       })
@@ -166,7 +142,6 @@ const revenueSlice = createSlice({
       })
 
 
-      // ===== TREND =====
       .addCase(fetchRevenueTrend.pending, (state) => {
         state.isLoading = true;
       })
@@ -176,7 +151,6 @@ const revenueSlice = createSlice({
       })
 
 
-      // ===== BY PLAN =====
       .addCase(fetchRevenueByPlan.pending, (state) => {
         state.isLoading = true;
       })
@@ -186,7 +160,6 @@ const revenueSlice = createSlice({
       })
 
 
-      // ===== INVOICES =====
       .addCase(fetchInvoices.pending, (state) => {
         state.isLoading = true;
       })

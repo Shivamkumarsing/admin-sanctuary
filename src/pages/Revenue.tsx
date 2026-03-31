@@ -38,64 +38,8 @@ import {
   fetchRevenueTrend,
 } from "@/store/slices/revenue.slice";
 
-const revenueData = [
-  { month: "Jan", revenue: 45000 },
-  { month: "Feb", revenue: 52000 },
-  { month: "Mar", revenue: 48000 },
-  { month: "Apr", revenue: 61000 },
-  { month: "May", revenue: 55000 },
-  { month: "Jun", revenue: 67000 },
-  { month: "Jul", revenue: 72000 },
-  { month: "Aug", revenue: 78000 },
-  { month: "Sep", revenue: 85000 },
-  { month: "Oct", revenue: 91000 },
-  { month: "Nov", revenue: 88000 },
-  { month: "Dec", revenue: 95000 },
-];
 
-const planRevenueData = [
-  { name: "Basic", value: 25000, color: "hsl(221, 83%, 53%)" },
-  { name: "Premium", value: 45000, color: "hsl(173, 80%, 40%)" },
-  { name: "Enterprise", value: 25400, color: "hsl(142, 76%, 36%)" },
-];
 
-const invoices = [
-  {
-    id: "INV-001",
-    society: "Greenview Apartments",
-    amount: "$299",
-    date: "2024-05-01",
-    status: "paid",
-  },
-  {
-    id: "INV-002",
-    society: "Sunrise Tower",
-    amount: "$99",
-    date: "2024-05-01",
-    status: "paid",
-  },
-  {
-    id: "INV-003",
-    society: "Palm Gardens",
-    amount: "$599",
-    date: "2024-05-01",
-    status: "pending",
-  },
-  {
-    id: "INV-004",
-    society: "Ocean View Society",
-    amount: "$299",
-    date: "2024-05-01",
-    status: "paid",
-  },
-  {
-    id: "INV-005",
-    society: "City Center Plaza",
-    amount: "$599",
-    date: "2024-05-01",
-    status: "paid",
-  },
-];
 
 const statusStyles = {
   paid: "status-active",
@@ -107,7 +51,26 @@ export default function Revenue() {
   const dispatch = useAppDispatch();
 
   const { stats } = useAppSelector((state) => state.revenueSlice);
-  console.log("Revenue Stats:::::::::", stats);
+  const RevenueTrends = useAppSelector((state) => state.revenueSlice.trend);
+  const RevenueByPlan = useAppSelector((state) => state.revenueSlice.byPlan);
+  const invoicessss = useAppSelector((state) => state.revenueSlice.invoices);
+
+  const formattedPlanRevenue = (RevenueByPlan || []).map(
+    (item: any, index: number) => ({
+      name: item.plan,
+      value: Number(item.revenue) || 0,
+      color: index === 0 ? "hsl(173, 80%, 40%)" : "hsl(221, 83%, 53%)",
+    }),
+  );
+
+  const formattedInvoices = (invoicessss || []).map((item: any) => ({
+  id: item.id,
+  invoiceId: item.invoice_id,
+  society: item.society,
+  amount: Number(item.amount),
+  date: new Date(item.date).toLocaleDateString(),
+  status: item.status.toLowerCase(), 
+}));
 
   useEffect(() => {
     dispatch(fetchRevenueStats());
@@ -115,6 +78,7 @@ export default function Revenue() {
     dispatch(fetchRevenueByPlan());
     dispatch(fetchInvoices({ page: 1, limit: 10 }));
   }, [dispatch]);
+
   return (
     <AdminLayout>
       {/* Page Header */}
@@ -213,7 +177,7 @@ export default function Revenue() {
           </h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData}>
+              <AreaChart data={RevenueTrends || []}>
                 <defs>
                   <linearGradient
                     id="revenueGradient2"
@@ -282,7 +246,7 @@ export default function Revenue() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={planRevenueData}
+                  data={formattedPlanRevenue}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -290,16 +254,17 @@ export default function Revenue() {
                   paddingAngle={4}
                   dataKey="value"
                 >
-                  {planRevenueData.map((entry, index) => (
+                  {formattedPlanRevenue.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip
                   formatter={(value: number) => [
-                    `$${value.toLocaleString()}`,
-                    "",
+                    `₹${value.toLocaleString()}`,
+                    "Revenue",
                   ]}
                 />
+
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -339,7 +304,7 @@ export default function Revenue() {
               </tr>
             </thead>
             <tbody>
-              {invoices.map((invoice) => (
+              {formattedInvoices.map((invoice) => (
                 <tr
                   key={invoice.id}
                   className="border-b border-border hover:bg-secondary/30 transition-colors"
