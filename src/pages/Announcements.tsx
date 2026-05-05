@@ -23,7 +23,9 @@ import {
 
 export default function Announcements() {
   const dispatch = useAppDispatch();
-
+  
+  // Current authenticated user (used to derive numeric `created_by`)
+  const authUser = useAppSelector((state) => state.auth.user as any);
   const { list, loading, createLoading } = useAppSelector(
     (state) => state.announcementsSlice
   );
@@ -51,8 +53,10 @@ export default function Announcements() {
     await dispatch(
       createAnnouncement({
         title,
-        message,
+        content: message,
         target,
+        // backend expects a numeric `created_by` (user id)
+        created_by: Number(authUser?.id) || 1,
       })
     );
 

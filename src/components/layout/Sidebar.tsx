@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/slices/authSlice";
 import {
   LayoutDashboard,
   Building2,
@@ -18,7 +20,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/Screenshot_2026-01-27_204458-removebg-preview.png"
-import { useNavigate } from "react-router-dom";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Building2, label: "Societies", path: "/societies" },
@@ -41,18 +42,13 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation();
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
-const handleLogout = () => {
-  // ⭐ Clear storage
-  localStorage.clear();
-
-  // If you use sessionStorage also:
-  sessionStorage.clear();
-
-  // ⭐ Redirect to login
-  navigate("/login", { replace: true });
-};
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login", { replace: true });
+  };
   return (
     <aside
       className={cn(
@@ -120,7 +116,7 @@ const handleLogout = () => {
               </p>
               <p className="text-xs text-sidebar-muted truncate">admin@company.com</p>
             </div>
-            {/* <button
+            <button
     onClick={handleLogout}
     className={cn(
       "w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm",
@@ -129,7 +125,7 @@ const handleLogout = () => {
   >
     <span>🚪</span>
     {!collapsed && <span>Logout</span>}
-  </button> */}
+  </button>
           </div>
         )}
         {collapsed && (
